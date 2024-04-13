@@ -284,21 +284,6 @@ int main(int argc, char **argv)
 	printf(".globl main\n");
 	printf("main:\n");
 
-	// printf("  mov rax, %d\n", expect_number());
-	// // `+ <数>`あるいは`- <数>`というトークンの並びを消費しつつ
-	// // アセンブリを出力
-	// while (!at_eof())
-	// {
-	// 	if (consume('+'))
-	// 	{
-	// 		printf("  add rax, %d\n", expect_number());
-	// 		continue;
-	// 	}
-
-	// 	expect('-');
-	// 	printf("  sub rax, %d\n", expect_number());
-	// }
-
 	gen(node);
 
 	// スタックトップに式全体の値が残っているはずなので
