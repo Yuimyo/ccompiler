@@ -70,6 +70,19 @@ bool consume(char *op)
     return true;
 }
 
+// 次のトークンがidentトークンのときには、トークンを1つ読み進めて
+// 読み込んだトークンを返す。それ以外の場合はnullを返す。
+Token *consume_ident()
+{
+    if (token->kind != TK_IDENT)
+    {
+        return NULL;
+    }
+    Token *tok = token;
+    token = token->next;
+    return tok;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op)
@@ -141,9 +154,15 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (strchr("+-*/()<>;", *p))
+        if (strchr("+-*/()<>;=", *p))
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
+            continue;
+        }
+
+        if ('a' <= *p && *p <= 'z')
+        {
+            cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }
 
@@ -186,6 +205,7 @@ Node *new_node_num(int val)
 
 Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
@@ -201,10 +221,22 @@ Node *stmt()
     return node;
 }
 
-// expr = equality
+// expr = assign
 Node *expr()
 {
-    return equality();
+    return assign();
+}
+
+// assign = equality ('=' assign)?
+Node *assign()
+{
+    Node *node = equality();
+    if (consume("="))
+    {
+        node = new_node(ND_ASSIGN, node, assign());
+    }
+
+    return node;
 }
 
 // equality = relational ("==" relational | "!=" relational)*
@@ -287,7 +319,7 @@ Node *unary()
     return primary();
 }
 
-// primary = "(" expr ")" | num
+// primary = "(" expr ")" | num | ident
 Node *primary()
 {
     if (consume("("))
@@ -296,5 +328,15 @@ Node *primary()
         expect(")");
         return node;
     };
+
+    Token *tok = consume_ident();
+    if (tok)
+    {
+        Node *node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (tok->str[0] - 'a' + 1) * 8;
+        return node;
+    }
+
     return new_node_num(expect_number());
 }

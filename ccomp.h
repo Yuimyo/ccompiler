@@ -12,6 +12,7 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool consume(char *op);
 void expect(char *op);
+Token *consume_ident();
 int expect_number();
 bool at_eof();
 bool startswith(char *p, char *q);
@@ -28,6 +29,8 @@ typedef enum
     ND_SUB,       // -
     ND_MUL,       // *
     ND_DIV,       // /
+    ND_ASSIGN,    // =
+    ND_LVAR,      // ローカル変数
     ND_NUM,       // 整数
 } NodeKind;
 typedef struct Node Node;
@@ -37,11 +40,13 @@ struct Node
     Node *lhs;     // 子(左)
     Node *rhs;     // 子(右)
     int val;       // kindがND_NUMの場合のみ使う
+    int offset;    // kindがND_LVARの場合のみ使う
 };
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
 Node *new_node_num(int val);
 Node *stmt();
 Node *expr();
+Node *assign();
 Node *equality();
 Node *relational();
 Node *add();
