@@ -141,7 +141,7 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (strchr("+-*/()<>", *p))
+        if (strchr("+-*/()<>;", *p))
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
@@ -184,6 +184,7 @@ Node *new_node_num(int val)
     return node;
 }
 
+Node *stmt();
 Node *expr();
 Node *equality();
 Node *relational();
@@ -191,6 +192,14 @@ Node *add();
 Node *mul();
 Node *unary();
 Node *primary();
+
+// stmt = expr ";"
+Node *stmt()
+{
+    Node *node = expr();
+    expect(";");
+    return node;
+}
 
 // expr = equality
 Node *expr()

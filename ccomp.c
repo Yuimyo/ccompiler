@@ -6,6 +6,18 @@
 #include <string.h>
 #include "ccomp.h"
 
+Node *code[100];
+
+void program()
+{
+	int i = 0;
+	while (!at_eof())
+	{
+		code[i++] = stmt();
+	}
+	code[i] = NULL;
+}
+
 int main(int argc, char **argv)
 {
 	if (argc != 2)
@@ -16,18 +28,27 @@ int main(int argc, char **argv)
 
 	user_input = argv[1];
 	token = tokenize(argv[1]);
-	Node *node = expr();
+	program();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 	printf("main:\n");
 
-	gen(node);
+	// プロローグ
+	printf("  push rbp\n");
+	printf("  mov rbp, rsp\n");
+	printf("  sub rsp, %d\n", 26 * 8);
 
-	// スタックトップに式全体の値が残っているはずなので
-	// それをRAXにロードして関数からの返り値とする
-	printf("  pop rax\n"); // 電卓の計算結果を格納
+	for (int i = 0; code[i]; i++)
+	{
+		gen(code[i]);
+		printf("  pop rax\n");
+	}
+
+	// エピローグ
+	printf("  mov rsp, rbp\n");
+	printf("  pop rbp\n");
+
 	printf("  ret\n");
-
 	return 0;
 }
