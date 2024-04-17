@@ -6,16 +6,17 @@
 #include <string.h>
 #include "ccomp.h"
 
-Node *code[100];
-
-void program()
+Node *program()
 {
-	int i = 0;
+	Node head;
+	head.next = NULL;
+	Node *cur = &head;
 	while (!at_eof())
 	{
-		code[i++] = stmt();
+		cur->next = stmt();
+		cur = cur->next;
 	}
-	code[i] = NULL;
+	return head.next;
 }
 
 int main(int argc, char **argv)
@@ -28,7 +29,7 @@ int main(int argc, char **argv)
 
 	user_input = argv[1];
 	token = tokenize(argv[1]);
-	program();
+	Node *cur = program();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
@@ -39,10 +40,11 @@ int main(int argc, char **argv)
 	printf("  mov rbp, rsp\n");
 	printf("  sub rsp, %d\n", 26 * 8);
 
-	for (int i = 0; code[i]; i++)
+	for (int i = 0; cur; i++)
 	{
-		gen(code[i]);
+		gen(cur);
 		printf("  pop rax\n");
+		cur = cur->next;
 	}
 
 	// エピローグ

@@ -37,6 +37,7 @@ typedef struct Node Node;
 struct Node
 {
     NodeKind kind; // ノードの型
+    Node *next;    // 次に処理する式(NULLで終了)
     Node *lhs;     // 子(左)
     Node *rhs;     // 子(右)
     int val;       // kindがND_NUMの場合のみ使う
