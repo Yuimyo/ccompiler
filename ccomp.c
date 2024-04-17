@@ -14,7 +14,20 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	gen(argv);
+	user_input = argv[1];
+	token = tokenize(argv[1]);
+	Node *node = expr();
+
+	printf(".intel_syntax noprefix\n");
+	printf(".globl main\n");
+	printf("main:\n");
+
+	gen(node);
+
+	// スタックトップに式全体の値が残っているはずなので
+	// それをRAXにロードして関数からの返り値とする
+	printf("  pop rax\n"); // 電卓の計算結果を格納
+	printf("  ret\n");
 
 	return 0;
 }

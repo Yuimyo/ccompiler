@@ -6,7 +6,7 @@
 #include <string.h>
 #include "ccomp.h"
 
-void gen_by_node(Node *node)
+void gen(Node *node)
 {
     if (node->kind == ND_NUM)
     {
@@ -14,8 +14,8 @@ void gen_by_node(Node *node)
         return;
     }
 
-    gen_by_node(node->lhs);
-    gen_by_node(node->rhs);
+    gen(node->lhs);
+    gen(node->rhs);
 
     printf("  pop rdi\n");
     printf("  pop rax\n");
@@ -58,22 +58,4 @@ void gen_by_node(Node *node)
     }
 
     printf("  push rax\n");
-}
-
-void gen(char **argv)
-{
-    user_input = argv[1];
-    token = tokenize(argv[1]);
-    Node *node = expr();
-
-    printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-    printf("main:\n");
-
-    gen_by_node(node);
-
-    // スタックトップに式全体の値が残っているはずなので
-    // それをRAXにロードして関数からの返り値とする
-    printf("  pop rax\n"); // 電卓の計算結果を格納
-    printf("  ret\n");
 }
