@@ -10,13 +10,7 @@ typedef struct Token Token;
 struct Token;
 void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
-bool consume(char *op);
-void expect(char *op);
-Token *consume_ident();
-int expect_number();
 bool at_eof();
-bool startswith(char *p, char *q);
-Token *new_token(TokenKind kind, Token *cur, char *str, int len);
 Token *tokenize(char *p);
 
 typedef enum
@@ -43,17 +37,7 @@ struct Node
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
 };
-Node *new_node(NodeKind kind, Node *lhs, Node *rhs);
-Node *new_node_num(int val);
 Node *stmt();
-Node *expr();
-Node *assign();
-Node *equality();
-Node *relational();
-Node *add();
-Node *mul();
-Node *unary();
-Node *primary();
 
 extern Token *token;
 extern char *user_input;
