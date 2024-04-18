@@ -51,6 +51,16 @@ Token *consume_ident()
     return tok;
 }
 
+bool consume_return()
+{
+    if (token->kind != TK_RETURN)
+    {
+        return false;
+    }
+    token = token->next;
+    return true;
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op)
@@ -107,6 +117,14 @@ bool is_ident2(char c)
     return is_ident1(c) || ('0' <= c && c <= '9');
 }
 
+bool is_alnum(char c)
+{
+    return ('a' <= c && c <= 'z') ||
+           ('A' <= c && c <= 'Z') ||
+           ('0' <= c && c <= '9') ||
+           c == '_';
+}
+
 Token *tokenize(char *p)
 {
     Token head;
@@ -136,6 +154,21 @@ Token *tokenize(char *p)
         {
             cur = new_token(TK_RESERVED, cur, p++, 1);
             continue;
+        }
+
+        if (startswith(p, "return"))
+        {
+            char *q = p;
+            p += 6;
+            if (!is_alnum(*p))
+            {
+                cur = new_token(TK_RETURN, cur, q, 6);
+                continue;
+            }
+            else
+            {
+                p = q;
+            }
         }
 
         if (is_ident1(*p))
@@ -266,10 +299,20 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-// stmt = expr ";"
+// stmt = expr ";" | "return" expr ";"
 Node *stmt()
 {
-    Node *node = expr();
+    Node *node;
+    if (consume_return())
+    {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
+    }
+    else
+    {
+        node = expr();
+    }
     expect(";");
     return node;
 }
