@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 // トークンの種類
 typedef enum
 {
