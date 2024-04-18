@@ -47,5 +47,8 @@ assert 3 '1; 2; 3;'
 assert 3 "a = 3; a;"
 assert 14 "a = 3; b = 5 * 6 - 8; a + b / 2;"
 
+assert 21 "foo = 3; bar = 7; foo * bar;"
+assert 41 "qu1ck_brown_f0x = 2; jump5 = 3; oVER = 5; the_LAZY_D0G = 7; qu1ck_brown_f0x * jump5 + oVER * the_LAZY_D0G;"
+
 echo OK
 

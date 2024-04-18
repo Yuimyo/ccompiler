@@ -38,7 +38,11 @@ int main(int argc, char **argv)
 	// プロローグ
 	printf("  push rbp\n");
 	printf("  mov rbp, rsp\n");
-	printf("  sub rsp, %d\n", 26 * 8);
+	int lmemsize = allocated_lvar_size();
+	if (lmemsize)
+	{
+		printf("  sub rsp, %d\n", lmemsize);
+	}
 
 	for (int i = 0; cur; i++)
 	{

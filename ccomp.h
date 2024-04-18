@@ -12,6 +12,7 @@ void error(char *fmt, ...);
 void error_at(char *loc, char *fmt, ...);
 bool at_eof();
 Token *tokenize(char *p);
+int allocated_lvar_size();
 
 typedef enum
 {

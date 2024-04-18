@@ -97,6 +97,16 @@ Token *new_token(TokenKind kind, Token *cur, char *str, int len)
     return tok;
 }
 
+bool is_ident1(char c)
+{
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == '_';
+}
+
+bool is_ident2(char c)
+{
+    return is_ident1(c) || ('0' <= c && c <= '9');
+}
+
 Token *tokenize(char *p)
 {
     Token head;
@@ -128,9 +138,17 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if ('a' <= *p && *p <= 'z')
+        if (is_ident1(*p))
         {
-            cur = new_token(TK_IDENT, cur, p++, 1);
+            char *q = p;
+            int len = 0;
+            do
+            {
+                p++;
+                len++;
+            } while (is_ident2(*p));
+
+            cur = new_token(TK_IDENT, cur, q, len);
             continue;
         }
 
@@ -154,6 +172,41 @@ Token *tokenize(char *p)
 // パーサー
 //
 
+typedef struct LVar LVar;
+struct LVar
+{
+    char *name; // 文字列
+    int len;    // 文字列の長さ
+    int offset; // スタック上のオフセット
+    LVar *next; // 次のローカル変数
+};
+
+LVar *locals;
+
+int allocated_lvar_size()
+{
+    if (locals)
+    {
+        return locals->offset;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+LVar *find_lvar(char *str, int len)
+{
+    for (LVar *var = locals; var; var = var->next)
+    {
+        if (var->len == len && !memcmp(str, var->name, var->len))
+        {
+            return var;
+        }
+    }
+    return NULL;
+}
+
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs)
 {
     Node *node = calloc(1, sizeof(Node));
@@ -168,6 +221,38 @@ Node *new_node_num(int val)
     Node *node = calloc(1, sizeof(Node));
     node->kind = ND_NUM;
     node->val = val;
+    return node;
+}
+
+Node *new_node_ident(char *str, int len)
+{
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_LVAR;
+
+    LVar *lvar = find_lvar(str, len);
+    if (lvar)
+    {
+        node->offset = lvar->offset;
+    }
+    else
+    {
+        lvar = calloc(1, sizeof(LVar));
+        lvar->name = str;
+        lvar->len = len;
+        lvar->next = locals;
+        if (locals)
+        {
+            lvar->offset = locals->offset + 8;
+        }
+        else
+        {
+            lvar->offset = 8;
+        }
+
+        locals = lvar;
+        node->offset = lvar->offset;
+    }
+
     return node;
 }
 
@@ -300,10 +385,7 @@ Node *primary()
     Token *tok = consume_ident();
     if (tok)
     {
-        Node *node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
-        return node;
+        return new_node_ident(tok->str, tok->len);
     }
 
     return new_node_num(expect_number());
