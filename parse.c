@@ -156,19 +156,11 @@ Token *tokenize(char *p)
             continue;
         }
 
-        if (startswith(p, "return"))
+        if (startswith(p, "return") && !is_alnum(p[6]))
         {
-            char *q = p;
+            cur = new_token(TK_RETURN, cur, p, 6);
             p += 6;
-            if (!is_alnum(*p))
-            {
-                cur = new_token(TK_RETURN, cur, q, 6);
-                continue;
-            }
-            else
-            {
-                p = q;
-            }
+            continue;
         }
 
         if (is_ident1(*p))
