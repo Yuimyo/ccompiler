@@ -52,5 +52,8 @@ assert 41 "qu1ck_brown_f0x = 2; jump5 = 3; oVER = 5; the_LAZY_D0G = 7; qu1ck_bro
 
 assert 40 "return 40; 1;"
 
+assert 30 "if (1) return 30; return 20;"
+assert 20 "if (0) return 30; else return 20; return 10;"
+
 echo OK
 

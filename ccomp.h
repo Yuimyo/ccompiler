@@ -7,6 +7,8 @@ typedef enum
     TK_IDENT,    // 識別子
     TK_NUM,      // 整数トークン
     TK_RETURN,   // return
+    TK_IF,       // if
+    TK_ELSE,     // else
     TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
 typedef struct Token Token;
@@ -31,6 +33,8 @@ typedef enum
     ND_LVAR,      // ローカル変数
     ND_NUM,       // 整数
     ND_RETURN,    // return
+    ND_IF,        // if
+    ND_IFFOLK,    // ifの分岐先
 } NodeKind;
 typedef struct Node Node;
 struct Node

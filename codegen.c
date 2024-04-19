@@ -18,6 +18,8 @@ void gen_lvar(Node *node)
     printf("  push rax\n");
 }
 
+int incr_if = 0;
+
 void gen(Node *node)
 {
     switch (node->kind)
@@ -48,6 +50,31 @@ void gen(Node *node)
         printf("  pop rbp\n");
 
         printf("  ret\n");
+        return;
+    case ND_IF:
+        gen(node->lhs);
+
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+
+        Node *iffolk = node->rhs;
+        if (!(iffolk->rhs))
+        {
+            printf("  je  .Lend%d\n", incr_if);
+            gen(iffolk->lhs);
+            printf(".Lend%d:\n", incr_if);
+        }
+        else
+        {
+            printf("  je  .Lelse%d\n", incr_if);
+            gen(iffolk->lhs);
+            printf("  jmp .Lend%d\n", incr_if);
+            printf(".Lelse%d:\n", incr_if);
+            gen(iffolk->rhs);
+            printf(".Lend%d:\n", incr_if);
+        }
+
+        incr_if++;
         return;
     }
 

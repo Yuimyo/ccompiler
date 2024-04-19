@@ -51,14 +51,29 @@ Token *consume_ident()
     return tok;
 }
 
-bool consume_return()
+bool consume_tk(TokenKind kind)
 {
-    if (token->kind != TK_RETURN)
+    if (token->kind != kind)
     {
         return false;
     }
     token = token->next;
     return true;
+}
+
+bool consume_return()
+{
+    return consume_tk(TK_RETURN);
+}
+
+bool consume_if()
+{
+    return consume_tk(TK_IF);
+}
+
+bool consume_else()
+{
+    return consume_tk(TK_ELSE);
 }
 
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
@@ -160,6 +175,20 @@ Token *tokenize(char *p)
         {
             cur = new_token(TK_RETURN, cur, p, 6);
             p += 6;
+            continue;
+        }
+
+        if (startswith(p, "if") && !is_alnum(p[2]))
+        {
+            cur = new_token(TK_IF, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        if (startswith(p, "else") && !is_alnum(p[4]))
+        {
+            cur = new_token(TK_ELSE, cur, p, 4);
+            p += 4;
             continue;
         }
 
@@ -291,7 +320,9 @@ Node *mul();
 Node *unary();
 Node *primary();
 
-// stmt = expr ";" | "return" expr ";"
+// stmt = expr ";"
+//      | "return" expr ";"
+//      | "if" "(" expr ")" stmt ("else" stmt)?
 Node *stmt()
 {
     Node *node;
@@ -300,12 +331,30 @@ Node *stmt()
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
+        expect(";");
+    }
+    else if (consume_if())
+    {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        expect("(");
+        node->lhs = expr();
+        expect(")");
+
+        Node *iffolk = calloc(1, sizeof(Node));
+        iffolk->kind = ND_IFFOLK;
+        iffolk->lhs = stmt();
+        if (consume_else())
+        {
+            iffolk->rhs = stmt();
+        }
+        node->rhs = iffolk;
     }
     else
     {
         node = expr();
+        expect(";");
     }
-    expect(";");
     return node;
 }
 
