@@ -94,7 +94,7 @@ bool at_eof()
 
 bool startswith(char *p, char *q)
 {
-    return memcmp(p, q, strlen(q)) == 0;
+    return strncmp(p, q, strlen(q)) == 0;
 }
 
 Token *new_token(TokenKind kind, Token *cur, char *str, int len)
