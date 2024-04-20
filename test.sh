@@ -55,5 +55,23 @@ assert 40 "return 40; 1;"
 assert 30 "if (1) return 30; return 20;"
 assert 20 "if (0) return 30; else return 20; return 10;"
 
+assert 10 "while (0) return 20; return 10;"
+assert 20 "while (1) return 20; return 10;"
+assert 2 "b = 10; while (b > 2) b = b - 1; return b;"
+
+assert 1 "for (; ; ) return 0; return 1;"
+assert 1 "for (1; ; ) return 0; return 1;"
+assert 0 "for (; 1; ) return 0; return 1;"
+assert 1 "for (; ; 1) return 0; return 1;"
+assert 0 "for (1; 1; ) return 0; return 1;"
+assert 0 "for (; 1; 1) return 0; return 1;"
+assert 1 "for (1; ; 1) return 0; return 1;"
+assert 0 "for (1; 1; 1) return 0; return 1;"
+
+assert 32 "b = 1; for (a = 0; a < 5; a = a + 1) b = b * 2; return b;"
+assert 1 "b = 1; for (a = 0; ; ) b = b + 2; return b;"
+assert 1 "b = 1; for (; 0; ) b = b + 2; return b;"
+assert 1 "b = 1; for (; ; a = a + 1) b = b + 2; return b;"
+
 echo OK
 

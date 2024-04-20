@@ -19,6 +19,8 @@ void gen_lvar(Node *node)
 }
 
 int incr_if = 0;
+int incr_while = 0;
+int incr_for = 0;
 
 void gen(Node *node)
 {
@@ -75,6 +77,37 @@ void gen(Node *node)
         }
 
         incr_if++;
+        return;
+    case ND_WHILE:
+        printf(".LWbegin%d:\n", incr_while);
+
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .LWend%d\n", incr_while);
+        gen(node->rhs);
+        printf("  jmp .LWbegin%d\n", incr_while);
+
+        printf(".LWend%d:\n", incr_while);
+        incr_while++;
+        return;
+    case ND_FOR:
+        Node *forfolk = node->lhs;
+
+        gen(forfolk->lhs);
+        printf(".LFbegin%d:\n", incr_for);
+
+        gen(forfolk->mhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .LFend%d\n", incr_for);
+        gen(node->rhs);
+        gen(forfolk->rhs);
+
+        printf("  jmp .LFbegin%d\n", incr_for);
+
+        printf(".LFend%d:\n", incr_for);
+        incr_for++;
         return;
     }
 

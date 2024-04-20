@@ -9,6 +9,8 @@ typedef enum
     TK_RETURN,   // return
     TK_IF,       // if
     TK_ELSE,     // else
+    TK_WHILE,    // while
+    TK_FOR,      // for
     TK_EOF,      // 入力の終わりを表すトークン
 } TokenKind;
 typedef struct Token Token;
@@ -35,6 +37,9 @@ typedef enum
     ND_RETURN,    // return
     ND_IF,        // if
     ND_IFFOLK,    // ifの分岐先
+    ND_WHILE,     // while
+    ND_FOR,       // for
+    ND_FORFOLK,   // forの分岐先
 } NodeKind;
 typedef struct Node Node;
 struct Node
@@ -45,6 +50,7 @@ struct Node
     Node *rhs;     // 子(右)
     int val;       // kindがND_NUMの場合のみ使う
     int offset;    // kindがND_LVARの場合のみ使う
+    Node *mhs;     // kindがND_FORの場合のみ使う
 };
 Node *stmt();
 

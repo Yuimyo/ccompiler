@@ -76,6 +76,16 @@ bool consume_else()
     return consume_tk(TK_ELSE);
 }
 
+bool consume_while()
+{
+    return consume_tk(TK_WHILE);
+}
+
+bool consume_for()
+{
+    return consume_tk(TK_FOR);
+}
+
 // 次のトークンが期待している記号のときには、トークンを1つ読み進める。
 // それ以外の場合にはエラーを報告する。
 void expect(char *op)
@@ -189,6 +199,20 @@ Token *tokenize(char *p)
         {
             cur = new_token(TK_ELSE, cur, p, 4);
             p += 4;
+            continue;
+        }
+
+        if (startswith(p, "while") && !is_alnum(p[5]))
+        {
+            cur = new_token(TK_WHILE, cur, p, 5);
+            p += 5;
+            continue;
+        }
+
+        if (startswith(p, "for") && !is_alnum(p[3]))
+        {
+            cur = new_token(TK_FOR, cur, p, 3);
+            p += 3;
             continue;
         }
 
@@ -323,6 +347,8 @@ Node *primary();
 // stmt = expr ";"
 //      | "return" expr ";"
 //      | "if" "(" expr ")" stmt ("else" stmt)?
+//      | "while" "(" expr ")" stmt
+//      | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 Node *stmt()
 {
     Node *node;
@@ -349,6 +375,54 @@ Node *stmt()
             iffolk->rhs = stmt();
         }
         node->rhs = iffolk;
+    }
+    else if (consume_while())
+    {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        expect("(");
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+    }
+    else if (consume_for())
+    {
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+        expect("(");
+
+        Node *forfolk = calloc(1, sizeof(Node));
+        forfolk->kind = ND_FORFOLK;
+        if (!consume(";"))
+        {
+            forfolk->lhs = expr();
+            expect(";");
+        }
+        else
+        {
+            forfolk->lhs = new_node_num(0);
+        }
+        if (!consume(";"))
+        {
+            forfolk->mhs = expr();
+            expect(";");
+        }
+        else
+        {
+            forfolk->mhs = new_node_num(0);
+        }
+        if (!consume(")"))
+        {
+            forfolk->rhs = expr();
+            expect(")");
+        }
+        else
+        {
+            forfolk->rhs = new_node_num(0);
+        }
+
+        node->lhs = forfolk;
+        node->rhs = stmt();
     }
     else
     {
